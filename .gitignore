@@ -3,4 +3,4 @@ app-cov
 coverage.html
 *.swp
 npm-debug.log
-
+lib-cov
