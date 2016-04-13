@@ -11,5 +11,9 @@
     "tree"
   ],
   "author": "belukov <belukov@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "jscoverage": "^0.6.0",
+    "mocha": "^2.4.5"
+  }
 }
