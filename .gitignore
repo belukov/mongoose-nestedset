@@ -1,0 +1,6 @@
+node_modules
+app-cov
+coverage.html
+*.swp
+npm-debug.log
+
