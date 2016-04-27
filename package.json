@@ -16,8 +16,8 @@
   "devDependencies": {
     "jscoverage": "^0.6.0",
     "mocha": "^2.4.5"
+    "mongoose": "^4.4.12"
   },
   "dependencies": {
-    "mongoose": "^4.4.12"
   }
 }
