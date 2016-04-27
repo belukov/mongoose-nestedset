@@ -1,11 +1,11 @@
 {
   "name": "mongoose-nestedset",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "nestedSet plugin for mongoose schema",
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-	"test-cov": "(jscoverage lib lib-cov; COVERAGE=1; mocha -R html-cov > coverage.html);"
+    "test-cov": "(jscoverage lib lib-cov; COVERAGE=1; mocha -R html-cov > coverage.html);"
   },
   "keywords": [
     "nestedset",
@@ -16,5 +16,8 @@
   "devDependencies": {
     "jscoverage": "^0.6.0",
     "mocha": "^2.4.5"
+  },
+  "dependencies": {
+    "mongoose": "^4.4.12"
   }
 }
