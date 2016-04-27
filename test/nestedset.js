@@ -38,10 +38,10 @@ describe("NestedSet", function()
 		assert.equal('object', typeof schema.path('nright'));
 	});
 
-	it("Must ini Model", function() {
+	it("Must init Model", function() {
 	
 		model = mongoose.model("tree", schema);
-//		console.log(model);
+		assert.equal('function' , typeof model.spread);
 	});
 
 	it("Must add Root", function(done) {
@@ -55,6 +55,32 @@ describe("NestedSet", function()
 			assert.equal(1, node.nleft);
 			assert.equal(2, node.nright);
 			done();
+		});
+	});
+
+	it('Must not change tree attrs when change some fields', function(done) {
+	
+		model.findOne({name: 'Root'}, function(err, root) {
+			if(err) return done(err);
+
+			var nleft = root.nleft;
+			var nright = root.nright;
+			var level = root.level;
+
+			root.name = 'blablabla';
+			root.save(function(err, rootChanged) {
+				if(err) return done(err);
+				// return name back...
+				rootChanged.name = 'Root';
+				rootChanged.save(function(err, rootChanged) {
+					if(err) return done(err);
+
+					assert.equal(nleft, rootChanged.nleft);
+					assert.equal(nright, rootChanged.nright);
+					assert.equal(level, rootChanged.level);
+					done();
+				});
+			});
 		});
 	});
 
