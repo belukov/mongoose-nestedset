@@ -25,150 +25,171 @@ describe("NestedSet", function()
 		});
 	});
 
-	it("Must be a function", function()
-	{
-		//console.log(typeof NestedSet);
-		assert.equal('function', typeof NestedSet);
-	});
-
-	it("Must append plugin to schema", function()
-	{
-		schema.plugin(NestedSet);
-		assert.equal('object', typeof schema.path('nleft'));
-		assert.equal('object', typeof schema.path('nright'));
-	});
-
-	it("Must init Model", function() {
+	describe("Check NestedSet plugin", function() {
 	
-		model = mongoose.model("tree", schema);
-		assert.equal('function' , typeof model.spread);
-	});
 
-	it("Must add Root", function(done) {
-		var node = new model({name: "Root"});
-		node.save(function(err, res) {
-			if(err) return done(err);
 
-			//console.log("node : ", node, node.nleft);
-
-			assert.equal(0, node.level);
-			assert.equal(1, node.nleft);
-			assert.equal(2, node.nright);
-			done();
+		it("Must be a function", function()
+		{
+			//console.log(typeof NestedSet);
+			assert.equal('function', typeof NestedSet);
 		});
+
+		it("Must append plugin to schema", function()
+		{
+			schema.plugin(NestedSet);
+			assert.equal('object', typeof schema.path('nleft'));
+			assert.equal('object', typeof schema.path('nright'));
+		});
+
+		it("Must init Model", function() {
+		
+			model = mongoose.model("tree", schema);
+			assert.equal('function' , typeof model.spread);
+		});
+
+
 	});
 
-	it('Must not change tree attrs when change some fields', function(done) {
+	describe("Fill collection with test data", function() {
 	
-		model.findOne({name: 'Root'}, function(err, root) {
-			if(err) return done(err);
 
-			var nleft = root.nleft;
-			var nright = root.nright;
-			var level = root.level;
-
-			root.name = 'blablabla';
-			root.save(function(err, rootChanged) {
+		it("Must add Root", function(done) {
+			var node = new model({name: "Root"});
+			node.save(function(err, res) {
 				if(err) return done(err);
-				// return name back...
-				rootChanged.name = 'Root';
-				rootChanged.save(function(err, rootChanged) {
+
+				//console.log("node : ", node, node.nleft);
+
+				assert.equal(0, node.level);
+				assert.equal(1, node.nleft);
+				assert.equal(2, node.nright);
+				done();
+			});
+		});
+
+		it('Must not change tree attrs when change some fields', function(done) {
+		
+			model.findOne({name: 'Root'}, function(err, root) {
+				if(err) return done(err);
+
+				var nleft = root.nleft;
+				var nright = root.nright;
+				var level = root.level;
+
+				root.name = 'blablabla';
+				root.save(function(err, rootChanged) {
+					if(err) return done(err);
+					// return name back...
+					rootChanged.name = 'Root';
+					rootChanged.save(function(err, rootChanged) {
+						if(err) return done(err);
+
+						assert.equal(nleft, rootChanged.nleft);
+						assert.equal(nright, rootChanged.nright);
+						assert.equal(level, rootChanged.level);
+						done();
+					});
+				});
+			});
+		});
+
+		it("Must add Second Root", function(done) {
+			var node = new model({name: "Root 2"});
+			node.save(function(err, res) {
+				if(err) return done(err);
+
+				//console.log("node : ", node, node.nleft);
+
+				assert.equal(0, node.level);
+				assert.equal(3, node.nleft);
+				assert.equal(4, node.nright);
+				done();
+			});
+		});
+
+
+		it ("Must append new child to First Root", function(done) {
+		
+			model.findOne({name: 'Root'}, function(err, root) {
+
+				if (err) return done(err);
+				
+				root.append({name: 'Child 1'}, function(err, child) {
+				
 					if(err) return done(err);
 
-					assert.equal(nleft, rootChanged.nleft);
-					assert.equal(nright, rootChanged.nright);
-					assert.equal(level, rootChanged.level);
-					done();
+					assert.equal(child.parentId, root._id);
+					assert.equal(2, child.nleft);
+					assert.equal(3, child.nright);
+					assert.equal(1, child.level);
+
+					root.reload(function(err, root) {
+						if(err) return node(err);
+
+						assert.equal(4, root.nright);
+
+						// chech that Root2 shifted;
+						model.findOne({name: 'Root 2'}, function(err, root2) {
+							if(err) return node(err);
+
+							assert.equal(5, root2.nleft);
+							return done();
+						});
+
+					});
+
+
 				});
+
 			});
 		});
-	});
 
-	it("Must add Second Root", function(done) {
-		var node = new model({name: "Root 2"});
-		node.save(function(err, res) {
-			if(err) return done(err);
-
-			//console.log("node : ", node, node.nleft);
-
-			assert.equal(0, node.level);
-			assert.equal(3, node.nleft);
-			assert.equal(4, node.nright);
-			done();
-		});
-	});
-
-
-	it ("Must append new child to First Root", function(done) {
-	
-		model.findOne({name: 'Root'}, function(err, root) {
-
-			if (err) return done(err);
-			
-			root.append({name: 'Child 1'}, function(err, child) {
-			
+		it("Must prepend Child 2 to First Root Before Child 1", function(done) {
+		
+			model.findOne({name: 'Root'}, function(err, root) {
 				if(err) return done(err);
 
-				assert.equal(child.parentId, root._id);
-				assert.equal(2, child.nleft);
-				assert.equal(3, child.nright);
-				assert.equal(1, child.level);
+				root.prepend({name: 'Child 2'}, function(err, child) {
+					if(err) return done(err);
 
-				root.reload(function(err, root) {
-					if(err) return node(err);
-
+					assert.equal(child.parentId, root._id);
+					assert.equal(2, child.nleft);
+					assert.equal(3, child.nright);
+					assert.equal(1, child.level);
 					assert.equal(4, root.nright);
 
-					// chech that Root2 shifted;
-					model.findOne({name: 'Root 2'}, function(err, root2) {
+					root.reload(function(err, root) {
 						if(err) return node(err);
 
-						assert.equal(5, root2.nleft);
-						return done();
+						assert.equal(6, root.nright);
+
+						// chech that Root2 shifted;
+						model.findOne({name: 'Root 2'}, function(err, root2) {
+							if(err) return node(err);
+
+							assert.equal(7, root2.nleft);
+							return done();
+						});
+
 					});
 
 				});
 
-
 			});
-
 		});
+
+
 	});
 
-	it("Must prepend Child 2 to First Root Before Child 1", function(done) {
+
+	describe('Check all tree for correct position', function() {
 	
-		model.findOne({name: 'Root'}, function(err, root) {
-			if(err) return done(err);
-
-			root.prepend({name: 'Child 2'}, function(err, child) {
-				if(err) return done(err);
-
-				assert.equal(child.parentId, root._id);
-				assert.equal(2, child.nleft);
-				assert.equal(3, child.nright);
-				assert.equal(1, child.level);
-				assert.equal(4, root.nright);
-
-				root.reload(function(err, root) {
-					if(err) return node(err);
-
-					assert.equal(6, root.nright);
-
-					// chech that Root2 shifted;
-					model.findOne({name: 'Root 2'}, function(err, root2) {
-						if(err) return node(err);
-
-						assert.equal(7, root2.nleft);
-						return done();
-					});
-
-				});
-
-			});
-
+		it("Must be a correct tree", function(done) {
+		
+			checkTree(model, done);
 		});
 	});
-
 
 	
 });
@@ -184,4 +205,46 @@ function clear (cb) {
 				return cb();
 			}
 		});
+}
+
+function checkTree(model, cb) {
+
+	var tree = {};
+	model.find({}).sort('nleft').exec(function(err, list) {
+		if(err) return cb(err);
+		
+		//console.log(list);
+		for(var i = 0; i < list.length; i++) {
+			var doc = list[i];
+			tree[doc._id] = {
+				nleft : doc.nleft,
+				nright : doc.nright,
+				level : doc.level,
+				parent: doc.parentId,
+				childs: 0,
+			};
+
+			if(doc.parentId){
+				var prnt = tree[doc.parentId];
+				prnt.childs++;
+
+				assert( (doc.nright - doc.nleft) % 2 );
+				assert(prnt.nleft < doc.nleft);
+				assert(prnt.nright > doc.nright);
+				assert.equal(prnt.level, doc.level - 1);
+			}
+		}
+
+		// check childs count
+		for(var id in tree) {
+
+			var doc = tree[id];
+			var mathChilds = (doc.nright - doc.nleft - 1) / 2;
+			assert.equal(mathChilds, doc.childs);
+		}
+
+
+//		console.log(tree);
+		return cb();
+	})
 }
