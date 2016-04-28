@@ -179,6 +179,27 @@ describe("NestedSet", function()
 			});
 		});
 
+		it("Must add subchild to Child 1", function(done) {
+			
+			model.findOne({name: 'Child 1'}, function(err, ch1) {
+				if(err) return done(err);
+
+				ch1.append({name: 'SubChild 1.1'}, function(err, sub) {
+					if(err) return done(err);
+				
+					ch1.reload(function(err, ch1) {
+						if(err) return done(err);
+					
+						assert(ch1.nleft < sub.nleft);
+						assert(ch1.nright > sub.nright);
+						assert.equal(ch1._id.toString(), sub.parentId);
+						assert.equal(ch1.level, (sub.level - 1));
+						done();
+					});
+				});
+			});
+		});
+
 
 	});
 
@@ -226,12 +247,20 @@ function checkTree(model, cb) {
 
 			if(doc.parentId){
 				var prnt = tree[doc.parentId];
-				prnt.childs++;
 
 				assert( (doc.nright - doc.nleft) % 2 );
 				assert(prnt.nleft < doc.nleft);
 				assert(prnt.nright > doc.nright);
 				assert.equal(prnt.level, doc.level - 1);
+				
+				// inc all parents child count
+				var pid = doc.parentId;
+				while(pid) {
+					var par = tree[pid];
+					par.childs++;
+					pid = par.parent;
+				}
+				
 			}
 		}
 
