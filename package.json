@@ -4,7 +4,7 @@
   "description": "nestedSet plugin for mongoose schema",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec",
+    "test": "mocha --reporter spec -r jscoverage ",
     "test-cov": "(jscoverage lib lib-cov; COVERAGE=1; mocha -R html-cov > coverage.html);"
   },
   "keywords": [
@@ -19,5 +19,9 @@
     "mongoose": "^4.4.12"
   },
   "dependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:belukov/mongoose-nestedset.git"
   }
 }
