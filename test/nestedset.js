@@ -119,7 +119,7 @@ describe("NestedSet", function()
 				
 					if(err) return done(err);
 
-					assert.equal(child.parentId, root._id);
+					assert.equal(child.parentId, root._id.toString());
 					assert.equal(2, child.nleft);
 					assert.equal(3, child.nright);
 					assert.equal(1, child.level);
@@ -233,6 +233,7 @@ describe("NestedSet", function()
 
 				assert.equal(nodes.Conflict1.nleft , nodes.Conflict2.nleft - 2);
 				assert.equal(nodes.Conflict1.nright , nodes.Conflict2.nright - 2);
+				done();
 			}
 		});
 

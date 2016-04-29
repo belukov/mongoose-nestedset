@@ -19,6 +19,7 @@
     "mongoose": "^4.4.12"
   },
   "dependencies": {
+    "queue": "^4.0.0"
   },
   "repository": {
     "type": "git",
