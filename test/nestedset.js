@@ -153,7 +153,7 @@ describe("NestedSet", function()
 				root.prepend({name: 'Child 2'}, function(err, child) {
 					if(err) return done(err);
 
-					assert.equal(child.parentId, root._id);
+					assert.equal(child.parentId, root._id.toString());
 					assert.equal(2, child.nleft);
 					assert.equal(3, child.nright);
 					assert.equal(1, child.level);
