@@ -199,15 +199,52 @@ describe("NestedSet", function()
 				});
 			});
 		});
+		it("Must be a correct tree", function(done) {
+			checkTree(model, done);
+		});
 
 
 	});
 
+	describe("Parallel conflicts", function() {
+
+		it("Must not suffle nleft and nright whete several childs appended in same time", function(done) {
+		
+			var count = 0;
+			var childs = ['Conflict1', 'Conflict2'];
+			model.findOne({name: 'Root 2'}, function(err, root) {
+				if(err) return done(err);
+
+				for(var i = 0; i < childs.length; i++) {
+					count++;
+					root.append({name: childs[i]}, callback);
+				}
+
+
+			})
+
+			var nodes = {};
+			function callback(err, node) {
+
+				if(err) done(err);
+				count--;
+				nodes[node.name] = node;
+				if(count > 0) return;
+
+				assert.equal(nodes.Conflict1.nleft , nodes.Conflict2.nleft - 2);
+				assert.equal(nodes.Conflict1.nright , nodes.Conflict2.nright - 2);
+			}
+		});
+
+		it("Must be a correct tree", function(done) {
+			checkTree(model, done);
+		});
+		
+	});
 
 	describe('Check all tree for correct position', function() {
 	
 		it("Must be a correct tree", function(done) {
-		
 			checkTree(model, done);
 		});
 	});
@@ -231,6 +268,8 @@ function clear (cb) {
 function checkTree(model, cb) {
 
 	var tree = {};
+	var nkeys = [];
+	var nkeyMax = 0;
 	model.find({}).sort('nleft').exec(function(err, list) {
 		if(err) return cb(err);
 		
@@ -244,6 +283,14 @@ function checkTree(model, cb) {
 				parent: doc.parentId,
 				childs: 0,
 			};
+			// nkeys must not repeat
+			assert.equal(-1, nkeys.indexOf(doc.nleft));
+			assert.equal(-1, nkeys.indexOf(doc.nright));
+			nkeys.push(doc.nleft);
+			nkeys.push(doc.nright);
+
+			if(nkeyMax < doc.nleft) nkeyMax = doc.nleft;
+			if(nkeyMax < doc.nright) nkeyMax = doc.nright;
 
 			if(doc.parentId){
 				var prnt = tree[doc.parentId];
@@ -271,6 +318,9 @@ function checkTree(model, cb) {
 			var mathChilds = (doc.nright - doc.nleft - 1) / 2;
 			assert.equal(mathChilds, doc.childs);
 		}
+
+		//console.log("holes check", nkeyMax, nkeys.length);
+		assert.equal(nkeyMax, nkeys.length);
 
 
 //		console.log(tree);
