@@ -1,6 +1,6 @@
 {
   "name": "mongoose-nestedset",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "nestedSet plugin for mongoose schema",
   "main": "index.js",
   "scripts": {

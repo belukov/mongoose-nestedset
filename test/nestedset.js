@@ -243,6 +243,25 @@ describe("NestedSet", function()
 		
 	});
 
+	describe("Check ancestors method", function() {
+	
+		it("Must be two parents for SubChild 1.1", function(done) {
+		
+			model.findOne({name: 'SubChild 1.1'}, function(err, child) {
+				if(err) return done(err);
+
+				child.ancestors(function(err, parents) {
+					if(err) return done(err);
+
+					assert.equal(2, parents.length);
+					assert.equal('Root', parents[0].name);
+					assert.equal('Child 1', parents[1].name);
+					return done();
+				});
+			});
+		});
+	});
+
 	describe('Check all tree for correct position', function() {
 	
 		it("Must be a correct tree", function(done) {
