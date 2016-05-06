@@ -262,6 +262,47 @@ describe("NestedSet", function()
 		});
 	});
 
+	describe("Check descendants method", function() {
+	
+		it("`Root 2` must have only 2 direct childs", function(done) {
+		
+			model.findOne({name: 'Root 2'}, function(err, root2) {
+				if(err) return done(err);
+
+				root2.descendants(function(err, list) {
+					if(err) return done(err);
+
+					assert.equal(2, list.length);
+					assert.equal('Conflict1', list[0].name);
+					assert.equal('Conflict2', list[1].name);
+
+					done();
+				});
+			});
+		});
+
+		it("`Root` must have 3 subnodes including SubChild 1.1", function(done) {
+		
+			model.findOne({name: 'Root'}, function(err, root) {
+				if(err) return done(err);
+
+				root.descendants(function(err, list) {
+					if(err) return done(err);
+
+					assert.equal(3, list.length);
+					assert.equal('Child 2', list[0].name); // inserted before Child 1
+					assert.equal('Child 1', list[1].name);
+					assert.equal('SubChild 1.1', list[2].name);
+
+					done();
+				});
+			});
+		});
+
+
+
+	});
+
 	describe('Check all tree for correct position', function() {
 	
 		it("Must be a correct tree", function(done) {
