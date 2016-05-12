@@ -7,13 +7,21 @@ Allow to store and control **tree structure** in plain collection.
 About NesetSet: [Wiki page](https://en.wikipedia.org/wiki/Nested_set_model)
 
 ## Install
-Use `git clone`, Luke..
+
+```
+cd /usr/lib/node_modules/
+git clone https://github.com/belukov/mongoose-nestedset.git
+cd /usr/lib/node_modules/mongoose-nestedset/
+npm link
+cd <path to project>
+npm link mongoose-nestedset
+```
 
 ## Usage
 
 ```js
 var Mongoose = require('mongoose');
-var NestedSet = require('../lib/mongoose-nestedset'); // or how this module will be named ?
+var NestedSet = require('mongoose-nestedset');
 
 var yourSchema = new mongoose.Schema({name: String});
 yourSchema.plugin(NestedSet);
