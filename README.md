@@ -6,6 +6,8 @@ Allow to store and control **tree structure** in plain collection.
 
 About NesetSet: [Wiki page](https://en.wikipedia.org/wiki/Nested_set_model)
 
+Use module queue to protect tree structuire from conflicts in callback stack
+
 ## Install
 
 ```
@@ -43,16 +45,18 @@ root.save(function(err, root) {
 ### Document methods
 |method|description|example|
 |---|---|---|
-|doc.append()|Append new node as last child of current node| `root.append({name:'child'}, function(err, childObj) {...})`|
-|doc.prepend()|Insert new node as first child of current| `root.prepend({name:'child'}, function(err, childObj) {...})` |
-|~~doc.move()|||
-|~~doc.childs()|||
-|~~doc.descendants()|||
-|~~doc.parent()|||
-|~~doc.parents()|||
+|doc.append(nodeInfo, cb)|Append new node as last child of current node| `root.append({name:'child'}, function(err, childObj) {...})`|
+|doc.prepend(nodeInfo, cb)|Insert new node as first child of current| `root.prepend({name:'child'}, function(err, childObj) {...})` |
+|doc.ancestors(cb)|Get all parents of current node|`node.ancestors(function(err, parentsColl) {...})`|
+|doc.descendants(cb)|Get fill subtree, based on current node|`node.descendants(function(err, descendantsColl) {...})`|
+|~~doc.move(cb)|||
+|~~doc.childs(cb)|||
+|~~doc.parent(cb)|||
 |...|||
 
 ### Model methods
 |method|description|example|
 |---|---|---|
+|model.shiftAfter(nright, size, cb)|Move all nodes which nleft greater than given nright argument. Increace nleft and nright to giver size arg|`model.shiftAfter(8, 2, function(err) {...})`|
+|model.spread(node, size, cb)|Increace nright of given node and his ancestors|`model.spread(curNode, 2, function(err) {...})`|
 |~~model.findTree()|||
