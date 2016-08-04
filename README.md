@@ -48,7 +48,7 @@ root.save(function(err, root) {
 |doc.append(nodeInfo, cb)|Append new node as last child of current node| `root.append({name:'child'}, function(err, childObj) {...})`|
 |doc.prepend(nodeInfo, cb)|Insert new node as first child of current| `root.prepend({name:'child'}, function(err, childObj) {...})` |
 |doc.ancestors(cb)|Get all parents of current node|`node.ancestors(function(err, parentsColl) {...})`|
-|doc.descendants(cb)|Get fill subtree, based on current node|`node.descendants(function(err, descendantsColl) {...})`|
+|doc.descendants(cb)|Get full subtree, based on current node|`node.descendants(function(err, descendantsColl) {...})`|
 |~~doc.move(cb)|||
 |~~doc.childs(cb)|||
 |~~doc.parent(cb)|||
@@ -57,6 +57,6 @@ root.save(function(err, root) {
 ### Model methods
 |method|description|example|
 |---|---|---|
-|model.shiftAfter(nright, size, cb)|Move all nodes which nleft greater than given nright argument. Increace nleft and nright to giver size arg|`model.shiftAfter(8, 2, function(err) {...})`|
+|model.shiftAfter(nright, size, cb)|Move all nodes which nleft greater than given nright argument. Increace nleft and nright to given size arg|`model.shiftAfter(8, 2, function(err) {...})`|
 |model.spread(node, size, cb)|Increace nright of given node and his ancestors|`model.spread(curNode, 2, function(err) {...})`|
 |~~model.findTree()|||
