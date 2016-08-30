@@ -320,7 +320,7 @@ describe('NestedSet', function()
 
           node.move(root2, function(err) {
             if(err) {
-              console.log("ERROR: ", err);
+              //console.log("ERROR: ", err);
               return done(err);
             }
 
@@ -380,8 +380,8 @@ describe('NestedSet', function()
 
             moveNode.reload(function(err, moveNode) {
 
-              console.log("new parent: ", newParent.toObject());
-              console.log('move node: ', moveNode.toObject());
+              //console.log("new parent: ", newParent.toObject());
+              //console.log('move node: ', moveNode.toObject());
 
               assert.equal(newParent._id.toString(), moveNode.parentId.toString());
               assert.equal(newParent.level + 1, moveNode.level);
@@ -393,6 +393,22 @@ describe('NestedSet', function()
         });
       });
 
+    });
+
+    it("Must return error if trying to move to node child", function(done) {
+    
+      model.findOne({name: 'Root 2'}, function(err, root2) {
+        if(err) return done(err);
+
+        model.findOne({name: 'MyMoveNode'}, function(err, child) {
+        
+          root2._move(child, function(err) {
+          
+            assert(err);
+            return done();
+          });
+        });
+      });
     });
     
 
@@ -451,7 +467,7 @@ function checkTree(model, cb) {
       if(doc.parentId){
         var prnt = tree[doc.parentId];
 
-        console.log("check doc: ", doc.name);
+        //console.log("check doc: ", doc.name);
         assert( (doc.nright - doc.nleft) % 2 );
         assert(prnt.nleft < doc.nleft);
         assert(prnt.nright > doc.nright);
