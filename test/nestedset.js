@@ -410,6 +410,45 @@ describe('NestedSet', function()
         });
       });
     });
+
+    it("Must move node to zero level by using null as new parent", function(done) {
+    
+      model.findOne({name: 'MyMoveNode'}, function(err, moveNode) {
+        if(err) return done(err);
+
+        moveNode.move(null, function(err) {
+          if(err) return done(err);
+
+          moveNode.reload(function(err, moveNode) {
+            if(err) return done(err);
+          
+            assert.equal(0, moveNode.level);
+            assert.equal(null, moveNode.parentId);
+            return done();
+          });
+        });
+      });
+    });
+
+    it("Must move node from zero level to root 2", function(done) {
+
+       model.findOne({name: 'MyMoveNode'}, function(err, moveNode) {
+        if(err) return done(err);
+
+        model.findOne({name: 'Root 2'}, function(err, root2) {
+        
+          moveNode.move(root2, function(err) {
+         
+            moveNode.reload(function(err, moveNode) {
+            
+              assert.equal(1, moveNode.level);
+              return done();
+            });
+          });
+        });
+      });
+   
+    });
     
 
   });
