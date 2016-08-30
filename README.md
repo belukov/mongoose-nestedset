@@ -49,7 +49,7 @@ root.save(function(err, root) {
 |doc.prepend(nodeInfo, cb)|Insert new node as first child of current| `root.prepend({name:'child'}, function(err, childObj) {...})` |
 |doc.ancestors(cb)|Get all parents of current node|`node.ancestors(function(err, parentsColl) {...})`|
 |doc.descendants(cb)|Get full subtree, based on current node|`node.descendants(function(err, descendantsColl) {...})`|
-|~~doc.move(cb)|||
+|doc.move(cb)|Move current node to given node.|node.move(newParentNode, function(err) {...})|
 |~~doc.childs(cb)|||
 |~~doc.parent(cb)|||
 |...|||
