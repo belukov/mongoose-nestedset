@@ -112,7 +112,6 @@ describe('NestedSet', function()
       });
     });
 
-
     it ('Must append new child to First Root', function(done) {
     
       model.findOne({name: 'Root'}, function(err, root) {
@@ -207,9 +206,7 @@ describe('NestedSet', function()
       checkTree(model, done);
     });
 
-
   });
-
   describe('Parallel conflicts', function() {
 
     it('Must not suffle nleft and nright whete several childs appended in same time', function(done) {
@@ -302,8 +299,102 @@ describe('NestedSet', function()
         });
       });
     });
+  });
 
+  describe("Check move method and change parent with save", function() {
 
+    before(function(done) {
+      model.findOne({name: 'Root'}, function (err, root) {
+        if(err) return done(err);
+        root.append({name: 'MoveNode'}, done);
+      });
+    });
+
+    it("Must move MoveNode to Root 2", function(done) {
+    
+      model.findOne({name: 'MoveNode'}, function(err, node) {
+        if(err) return done(err);
+
+        model.findOne({name: 'Root 2'}, function(err, root2) {
+          if(err) return done(err);
+
+          node.move(root2, function(err) {
+            if(err) {
+              console.log("ERROR: ", err);
+              return done(err);
+            }
+
+            node.reload(function(err, node) {
+              if(err) return done(err);
+              assert.equal(root2._id.toString(), node.parentId.toString());
+              assert.equal(root2.nright - 1, node.nright);
+              assert.equal(root2.nright - 2, node.nleft);
+              assert.equal(root2.level + 1, node.level);
+              checkTree(model, done);
+            });
+          });
+        });
+      });
+    });
+
+    it("Must move MoveNode to SubChild 1.1 (other level)", function(done) {
+    
+      model.findOne({name: 'MoveNode'}, function(err, moveNode) {
+        if(err) return done(err);
+
+        model.findOne({name: 'SubChild 1.1'}, function(err, newParent) {
+          if(err) return done(err);
+        
+          moveNode.move(newParent, function(err) {
+            if(err) return done(err);
+            
+            moveNode.reload(function(err, moveNode) {
+              if(err) return done(err);
+            
+              assert.equal(newParent._id.toString(), moveNode.parentId.toString());
+              assert.equal(newParent.level + 1, moveNode.level);
+              checkTree(model, done);
+            });
+          });
+        });
+      });
+    });
+
+    
+    it("Must save node with new parent id and move it quietly", function(done) {
+    
+      model.findOne({name: 'MoveNode'}, function(err, moveNode) {
+        if(err) return done(err);
+
+        model.findOne({name: 'Root 2'}, function(err, newParent) {
+          if(err) return done(err);
+
+          moveNode.name = 'MyMoveNode';
+          moveNode.parentId = newParent._id;
+          // try to broke
+          moveNode.level = 1000;
+          moveNode.nright = 1000;
+
+          moveNode.save(function(err) {
+            if(err) return done(err);
+
+            moveNode.reload(function(err, moveNode) {
+
+              console.log("new parent: ", newParent.toObject());
+              console.log('move node: ', moveNode.toObject());
+
+              assert.equal(newParent._id.toString(), moveNode.parentId.toString());
+              assert.equal(newParent.level + 1, moveNode.level);
+              checkTree(model, done);
+
+            });
+          });
+
+        });
+      });
+
+    });
+    
 
   });
 
@@ -360,6 +451,7 @@ function checkTree(model, cb) {
       if(doc.parentId){
         var prnt = tree[doc.parentId];
 
+        console.log("check doc: ", doc.name);
         assert( (doc.nright - doc.nleft) % 2 );
         assert(prnt.nleft < doc.nleft);
         assert(prnt.nright > doc.nright);
