@@ -182,7 +182,7 @@ describe('NestedSet', function()
       });
     });
 
-    it('Must add subchild to Child 1', function(done) {
+    it('Must append subchild to Child 1', function(done) {
       
       model.findOne({name: 'Child 1'}, function(err, ch1) {
         if(err) return done(err);
@@ -202,6 +202,39 @@ describe('NestedSet', function()
         });
       });
     });
+
+    
+    it("Must add node (just save) with parentId of Child 2", function(done) {
+    
+      model.findOne({name: 'Child 2'}, function(err, parentNode) {
+        if(err) return done(err);
+        var node = new model({
+          name: "SubChild 1.2",
+          parentId: parentNode._id
+        });
+        node.save(function(err) {
+          if(err) return done(err);
+
+          node.reload(function(err, node) {
+            if(err) return done(err);
+            parentNode.reload(function(err, parentNode) {
+
+              //console.log(node.toObject());
+              assert.equal(parentNode._id.toString(), node.parentId.toString());
+              assert.equal(parentNode.level + 1, node.level);
+              //console.log("assert %s < %s", parentNode.nleft , node.nleft)
+              assert(parentNode.nleft < node.nleft);
+              //console.log("assert %s > %s", parentNode.nright , node.nright)
+              assert(parentNode.nright > node.nright);
+              return done();
+            });
+          });
+        });
+      });
+
+    });
+    
+
     it('Must be a correct tree', function(done) {
       checkTree(model, done);
     });
@@ -290,10 +323,11 @@ describe('NestedSet', function()
         root.descendants(function(err, list) {
           if(err) return done(err);
 
-          assert.equal(3, list.length);
+          assert.equal(4, list.length);
           assert.equal('Child 2', list[0].name); // inserted before Child 1
-          assert.equal('Child 1', list[1].name);
-          assert.equal('SubChild 1.1', list[2].name);
+          assert.equal('SubChild 1.2', list[1].name);
+          assert.equal('Child 1', list[2].name);
+          assert.equal('SubChild 1.1', list[3].name);
 
           done();
         });
