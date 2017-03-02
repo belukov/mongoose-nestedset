@@ -14,6 +14,7 @@
   "author": "belukov <belukov@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "async": "^2.1.5",
     "jscoverage": "^0.6.0",
     "mocha": "^2.4.5",
     "mongoose": "^4.4.12"

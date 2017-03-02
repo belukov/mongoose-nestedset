@@ -12,6 +12,8 @@ var NestedSet = process.env.COVERAGE
   ? require('../lib-cov/nestedset')
   : require('../lib/nestedset');
 
+var treeOk = true;
+
 describe('NestedSet', function()
 {
 
@@ -483,17 +485,122 @@ describe('NestedSet', function()
       });
    
     });
+
     
-
-  });
-
-  describe('Check all tree for correct position', function() {
-  
     it('Must be a correct tree', function(done) {
       checkTree(model, done);
     });
+
   });
 
+  describe("Stress moving subtrees", function() {
+  
+    /*
+     * Source data
+     *[nodeName, [parentName]]
+     * */
+    let tree = [
+      ['n-1'],
+        ['n-1-1', 'n-1'],
+          ['n-1-1-1', 'n-1-1'],
+        ['n-1-2', 'n-1'],
+          ['n-1-2-1', 'n-1-2'],
+          ['n-1-2-2', 'n-1-2'],
+            ['n-1-2-2-1', 'n-1-2-2'],
+      ['n-2'],
+        ['n-2-1', 'n-2'],
+          ['n-2-1-1', 'n-2-1'],
+            ['n-2-1-1-1', 'n-2-1-1'],
+            ['n-2-1-1-2', 'n-2-1-1'],
+          ['n-2-1-2', 'n-2-1'],
+      ['n-3']
+    ];
+
+    before(function(done) {
+    
+      clear(function(err) {
+        if(err) return done(err);
+        return done();
+      });
+    });
+
+    for(let item of tree) {
+
+      it("Add " + item[0] + " to " + (item[1] ? item[1] : 'root'), function(done) {
+      
+        let node = new model({name: item[0]});
+        if(!item[1]) { // save to root
+          node.save(function(err) {
+            if(err) return done(err);
+            assert(!node.isNew);
+            return done();
+          });
+        } else {
+          model.findOne({name: item[1]}, function(err, par) {
+            if(err) return done(err);
+            if(!par) return done(new Error("Can't find node ", item[1]));
+
+            node.parentId = par._id;
+            node.save(function(err) {
+              if(err) return done(err);
+              assert(!node.isNew);
+              return done();
+            });
+          });
+        }
+      });
+    }
+
+    it('Must be a correct tree', function(done) {
+      checkTree(model, done);
+    });
+
+    /*
+     * [whatMove, whereMove]
+     * */
+    let movings = [
+      ['n-1-2-2', 'n-1-1'],
+      ['n-1-2-2', 'n-1-2'],
+      ['n-2-1-1', 'n-1-2-2'],
+      ['n-1-1', 'n-2-1-2'],
+      ['n-2-1-2', 'n-3'],
+      ['n-2', 'n-2-1-1'],
+      ['n-1-2-2']
+    ];
+
+    let stop = false;
+    for(let mv of movings) {
+    
+      it.skip("Must move " + mv[0] + " to " + (mv[1] ? mv[1] : 'root'), function(done) {
+     
+        if(!treeOk) this.skip();
+        model.findOne({name: mv[0]}, function(err, node) {
+          if(err) return done(err);
+
+          if(!mv[1]) {
+            node.parentId = null;
+            node.save(function(err) {
+              if(err) return done(err);
+              return checkTree(model, done);
+            });
+          } else {
+            model.findOne({name: mv[1]}, function(err, par) {
+              if(err) return done(err);
+              if(!par) return done(new Error("node " + mv[1] + ' not found'));
+
+              node.move(par, function(err) {
+                if(err) return done(err);
+                return checkTree(model, done);
+              });
+            });
+          }
+
+        });
+      });
+
+    }
+
+  });
   
 });
 
@@ -512,6 +619,7 @@ function clear (cb) {
 
 function checkTree(model, cb) {
 
+  treeOk = false;
   var tree = {};
   var nkeys = [];
   var nkeyMax = 0;
@@ -570,6 +678,7 @@ function checkTree(model, cb) {
 
 
 //    console.log(tree);
+    treeOk = true;
     return cb();
   });
 }
