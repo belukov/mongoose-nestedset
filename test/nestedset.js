@@ -571,7 +571,7 @@ describe('NestedSet', function()
     let stop = false;
     for(let mv of movings) {
     
-      it.skip("Must move " + mv[0] + " to " + (mv[1] ? mv[1] : 'root'), function(done) {
+      it("Must move " + mv[0] + " to " + (mv[1] ? mv[1] : 'root'), function(done) {
      
         if(!treeOk) this.skip();
         model.findOne({name: mv[0]}, function(err, node) {

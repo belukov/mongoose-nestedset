@@ -24,11 +24,11 @@ async.series([
   },
   function(done) {
   
+    console.log("\nOrder by parentId:");
     printByParent(null, 0, done);
   },
   function(done) {
-    console.log();
-    console.log();
+    console.log("\nOrder by nLeft: ");
     printByLeft(done);
   }
 ], fin);
@@ -54,7 +54,32 @@ function printByParent(parentId, level, done) {
   // }}}
 } 
 
-function printByLeft(level, done) {
+function printByLeft(done) {
+  // {{{
+  let parents = [];
+  mdl.find().sort('nleft').exec(function(err, nodes) {
+    if(err) return done(err);
+
+    for(let node of nodes) {
+      node = node.toObject();
+      node.id = node._id.toString();
+      let wrongPar = node.level > 0 &&  parents[node.level] != node.parentId;
+      parents = parents.slice(0, node.level + 1);
+      parents[node.level + 1] = node.id;
+      let str = '-'.repeat(node.level)
+        //+ '#' + node._id + ' '
+        + node.name
+        //+ "("+node.parentId+")"
+        + (wrongPar ? '  WRONG PARENT' : '');
+      console.log(str);
+    }
+    return done();
+  });
+  // }}}
+}
+
+/*
+function printCoube(level, done) {
   // {{{
   if('function' == typeof level) {
     done = level;
@@ -98,6 +123,7 @@ function printByLeft(level, done) {
   });
   // }}}
 }
+*/
 
 function connect(done) {
   // {{{
