@@ -39,13 +39,17 @@ function printByParent(parentId, level, done) {
   let filter = {
     parentId: parentId
   };
-  mdl.find(filter, function(err, nodes) {
+  //mdl.find(filter, function(err, nodes) {
+  mdl.find(filter).sort('nleft').exec(function(err, nodes) {
     if(err) return done(err);
 
     async.eachSeries(nodes, function(node, _cb) {
-    
+      node = node.toObject();
       let str = "-".repeat(level)
-          + node.name;
+          + node.name
+          + " <"+node.nleft+".."+node.nright+">"
+          + " lvl: " + node.level
+          ;
       console.log(str);
           
       return printByParent(node._id, (level + 1), _cb);
@@ -66,6 +70,7 @@ function printByLeft(done) {
       let wrongPar = node.level > 0 &&  parents[node.level] != node.parentId;
       parents = parents.slice(0, node.level + 1);
       parents[node.level + 1] = node.id;
+      console.log("level for node %s: '%s'", node.name, node.level);
       let str = '-'.repeat(node.level)
         //+ '#' + node._id + ' '
         + node.name
