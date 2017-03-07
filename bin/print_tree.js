@@ -6,10 +6,20 @@ const async = require('async');
 
 const schema = new mongoose.Schema({name: String});
 
-const mongoUri = 'mongodb://localhost/test_nestedset';
-//const mongoUri = 'mongodb://localhost/catalog';
-const collection = 'tree';
-//const collection = 'category';
+let mongoUri = 'mongodb://localhost/test_nestedset';
+let collection = 'tree';
+
+//console.log('env ', process.argv);
+if(process.argv[2]) {
+  if(!process.argv[3]) {
+    console.error('collection not set');
+    process.exit(1);
+  }
+  mongoUri = process.argv[2];
+  collection = process.argv[3];
+}
+
+
 
 let mdl = null;
 
@@ -70,12 +80,12 @@ function printByLeft(done) {
       let wrongPar = node.level > 0 &&  parents[node.level] != node.parentId;
       parents = parents.slice(0, node.level + 1);
       parents[node.level + 1] = node.id;
-      console.log("level for node %s: '%s'", node.name, node.level);
+      //console.log("level for node %s: '%s'", node.name, node.level);
       let str = '-'.repeat(node.level)
         //+ '#' + node._id + ' '
         + node.name
         //+ "("+node.parentId+")"
-        + (wrongPar ? '  WRONG PARENT' : '');
+        + (wrongPar ? '  !! WRONG PARENT' : '');
       console.log(str);
     }
     return done();
