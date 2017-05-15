@@ -8,7 +8,9 @@
 var assert = require('assert'),
   mongoose = require('mongoose');
 
-var NestedSet = process.env.COVERAGE ? require('../lib-cov/nestedset') : require('../lib/nestedset');
+var NestedSet = process.env.COVERAGE 
+  ? require('../lib-cov/nestedset') 
+  : require('../lib/nestedset');
 
 var treeOk = true;
 
